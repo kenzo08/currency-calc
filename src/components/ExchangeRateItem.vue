@@ -22,7 +22,7 @@ const rate = computed(() => {
 })
 
 const swapWith = () => {
-  [current.value, target.value] = [target.value, current.value]
+  ;[current.value, target.value] = [target.value, current.value]
 }
 
 watch(
