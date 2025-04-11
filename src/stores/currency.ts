@@ -1,51 +1,61 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import {ref} from 'vue';
+import { ref } from 'vue';
+import type { CurrencyCode, CurrencyState } from '../types/currency.ts';
 
-interface ExchangeRates {
-  [key: string]: number;
-}
+const API_URL = 'https://status.neuralgeneration.com/api/currency';
 
-export const useCurrencyStore = defineStore('currency', ()=>{
-  const baseCurrency = ref('USD')
-  const   rates =  ref<ExchangeRates>({})
-   const  loading = ref(false)
-   const error = ref<null | string>(null)
+export const useCurrencyStore = defineStore('currency', () => {
+  const state = ref<CurrencyState>({
+    baseCurrency: 'USD',
+    rates: {},
+    loading: false,
+    error: null
+  });
+
+  const lastFetchTime = ref<number>(0);
+
+
 
   async function fetchRates() {
-    loading.value = true;
-    error.value = null;
+    state.value.loading = true;
+    state.value.error = null;
+
     try {
-      const response = await axios.get('https://status.neuralgeneration.com/api/currency');
-      rates.value = response.data;
+      const response = await axios.get(API_URL);
+      state.value.rates = response.data;
+      lastFetchTime.value = Date.now();
     } catch (err) {
-      error.value = 'Failed to fetch exchange rates';
-      console.error(err);
+      state.value.error = err instanceof Error ? err.message : 'Failed to fetch exchange rates';
+      console.error('Error fetching rates:', err);
     } finally {
-      loading.value = false;
+      state.value.loading = false;
     }
   }
 
-  function setBaseCurrency(currency: string) {
-    baseCurrency.value = currency;
+  function setBaseCurrency(currency: CurrencyCode) {
+    state.value.baseCurrency = currency;
   }
 
-  function convert(amount: number, fromCurrency: string, toCurrency: string): number {
+  function convert(amount: number, fromCurrency: CurrencyCode, toCurrency: CurrencyCode): number {
     if (fromCurrency === toCurrency) {
       return amount;
     }
-    const directRate = rates.value[`${fromCurrency.toLowerCase()}-${toCurrency.toLowerCase()}`];
-    if (directRate) {
-      return Number((amount * directRate).toFixed(2));
-    }
 
-    const inverseRate = rates.value[`${toCurrency.toLowerCase()}-${fromCurrency.toLowerCase()}`];
-    if (inverseRate) {
-      return Number((amount / inverseRate).toFixed(2));
+    const rateKey = `${fromCurrency.toLowerCase()}-${toCurrency.toLowerCase()}`;
+    const rate = state.value.rates[rateKey];
+
+    if (rate) {
+      return Number((amount * rate).toFixed(2));
     }
 
     return 0;
   }
 
-  return {fetchRates, setBaseCurrency, convert, baseCurrency, error, loading, rates};
+  return {
+    state,
+    fetchRates,
+    setBaseCurrency,
+    convert,
+  };
 });
