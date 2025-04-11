@@ -7,13 +7,15 @@ const API_URL = 'https://status.neuralgeneration.com/api/currency';
 
 export const useCurrencyStore = defineStore('currency', () => {
   const state = ref<CurrencyState>({
-    baseCurrency: 'RUB',
+    baseCurrency: 'USD',
     rates: {},
     loading: false,
     error: null
   });
 
   const lastFetchTime = ref<number>(0);
+
+
 
   async function fetchRates() {
     state.value.loading = true;
@@ -35,9 +37,25 @@ export const useCurrencyStore = defineStore('currency', () => {
     state.value.baseCurrency = currency;
   }
 
+  function convert(amount: number, fromCurrency: CurrencyCode, toCurrency: CurrencyCode): number {
+    if (fromCurrency === toCurrency) {
+      return amount;
+    }
+
+    const rateKey = `${fromCurrency.toLowerCase()}-${toCurrency.toLowerCase()}`;
+    const rate = state.value.rates[rateKey];
+
+    if (rate) {
+      return Number((amount * rate).toFixed(2));
+    }
+
+    return 0;
+  }
+
   return {
     state,
     fetchRates,
     setBaseCurrency,
+    convert,
   };
 });

@@ -1,36 +1,28 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import { useCurrencyStore } from '../stores/currency';
-import {storeToRefs} from 'pinia';
-import {CurrencyCode} from '../types/currency.ts';
+import { storeToRefs } from 'pinia';
+import ExchangeRateItem from '../components/ExchangeRateItem.vue';
+import type { CurrencyCode } from '../types/currency.ts';
 
 const currencyStore = useCurrencyStore();
-const { fetchRates } = currencyStore
-const { state } = storeToRefs(currencyStore)
+const { fetchRates } = currencyStore;
+const { state } = storeToRefs(currencyStore);
 
+const currentCurrency = ref<CurrencyCode>(state.value.baseCurrency);
 const currencies: CurrencyCode[] = ['USD', 'EUR', 'RUB'];
 
-const exchangeRates = computed(() => {
-  const rates = [];
-  for (const currency of currencies) {
-    if (currency !== state.value.baseCurrency) {
-      const rateKey = `${state.value.baseCurrency.toLowerCase()}-${currency.toLowerCase()}`;
-      const rate = state.value.rates[rateKey];
-      if (rate) {
-        rates.push({
-          currency,
-          rate: rate.toString()
-        });
-      }
-    }
-  }
-  return rates;
+
+watch(()=> state.value.baseCurrency, (newCurrency)=>{
+  currentCurrency.value = newCurrency;
+})
+
+const otherCurrencies = computed(() => {
+  return currencies.filter(currency => currency !== currentCurrency.value);
 });
 
 const swapWith = (currency: CurrencyCode) => {
-  if (currency !== state.value.baseCurrency) {
-    state.value.baseCurrency = currency;
-  }
+  currentCurrency.value = currency;
 };
 
 onMounted(() => {
@@ -53,16 +45,13 @@ onMounted(() => {
     </div>
 
     <div v-else class="space-y-4">
-      <div v-for="{ currency, rate } in exchangeRates" :key="currency"
-           class="p-4 bg-white rounded shadow flex items-center justify-between">
-        <p class="text-xl">
-          1 {{ state.baseCurrency }}
-          <button @click="swapWith(currency)" class="mx-2 text-xl hover:rotate-180 transition">
-            ↔️
-          </button>
-          {{ currency }} = {{ rate }}
-        </p>
-      </div>
+      <ExchangeRateItem
+        v-for="currency in otherCurrencies"
+        :key="currency"
+        :baseCurrency="currentCurrency"
+        :targetCurrency="currency"
+        @swap="swapWith"
+      />
     </div>
   </div>
 </template>
