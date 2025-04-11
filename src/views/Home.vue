@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import {computed, onMounted, ref, watch} from 'vue';
-import { useCurrencyStore } from '../stores/currency';
-import { storeToRefs } from 'pinia';
-import ExchangeRateItem from '../components/ExchangeRateItem.vue';
-import type { CurrencyCode } from '../types/currency.ts';
+import { computed, onMounted, ref, watch } from 'vue'
+import { useCurrencyStore } from '../stores/currency'
+import { storeToRefs } from 'pinia'
+import ExchangeRateItem from '../components/ExchangeRateItem.vue'
+import type { CurrencyCode } from '../types/currency.ts'
 
-const currencyStore = useCurrencyStore();
-const { fetchRates } = currencyStore;
-const { state } = storeToRefs(currencyStore);
+const currencyStore = useCurrencyStore()
+const { fetchRates } = currencyStore
+const { state } = storeToRefs(currencyStore)
 
-const currentCurrency = ref<CurrencyCode>(state.value.baseCurrency);
-const currencies: CurrencyCode[] = ['USD', 'EUR', 'RUB'];
+const currentCurrency = ref<CurrencyCode>(state.value.baseCurrency)
+const currencies: CurrencyCode[] = ['USD', 'EUR', 'RUB']
 
-
-watch(()=> state.value.baseCurrency, (newCurrency)=>{
-  currentCurrency.value = newCurrency;
-})
+watch(
+  () => state.value.baseCurrency,
+  newCurrency => {
+    currentCurrency.value = newCurrency
+  }
+)
 
 const otherCurrencies = computed(() => {
-  return currencies.filter(currency => currency !== currentCurrency.value);
-});
+  return currencies.filter(currency => currency !== currentCurrency.value)
+})
 
 onMounted(() => {
-  if (!Object.keys(state.value.rates).length)
-    fetchRates();
-});
+  if (!Object.keys(state.value.rates).length) fetchRates()
+})
 </script>
 
 <template>

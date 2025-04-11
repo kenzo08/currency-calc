@@ -1,6 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
-import Convert from '../views/Convert.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home.vue'
+import Convert from '../views/Convert.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -8,14 +8,14 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: Home,
     },
     {
       path: '/convert',
       name: 'convert',
-      component: Convert
-    }
-  ]
-});
+      component: Convert,
+    },
+  ],
+})
 
-export default router;
+export default router
