@@ -17,8 +17,8 @@ const handleBaseCurrencyChange = (event: Event) => {
   <header class="bg-blue-600 text-white p-4">
     <div class="container mx-auto flex justify-between items-center">
       <nav class="space-x-4">
-        <router-link to="/" class="hover:text-blue-200">Home</router-link>
-        <router-link to="/convert" class="hover:text-blue-200">Convert</router-link>
+        <router-link active-class="text-blue-300" to="/" class="hover:text-blue-200">Home</router-link>
+        <router-link active-class="text-blue-300" to="/convert" class="hover:text-blue-200">Convert</router-link>
       </nav>
       
       <div class="flex items-center space-x-2">
