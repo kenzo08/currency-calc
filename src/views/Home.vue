@@ -5,7 +5,7 @@ import {storeToRefs} from 'pinia';
 import {CurrencyCode} from '../types/currency.ts';
 
 const currencyStore = useCurrencyStore();
-const { fetchRates, convert } = currencyStore
+const { fetchRates } = currencyStore
 const { state } = storeToRefs(currencyStore)
 
 const currencies: CurrencyCode[] = ['USD', 'EUR', 'RUB'];
@@ -14,14 +14,14 @@ const exchangeRates = computed(() => {
   const rates = [];
   for (const currency of currencies) {
     if (currency !== state.value.baseCurrency) {
-      const rate = convert(1, state.value.baseCurrency, currency);
-      rates.push({
-        currency,
-        rate: rate.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })
-      });
+      const rateKey = `${state.value.baseCurrency.toLowerCase()}-${currency.toLowerCase()}`;
+      const rate = state.value.rates[rateKey];
+      if (rate) {
+        rates.push({
+          currency,
+          rate: rate.toString()
+        });
+      }
     }
   }
   return rates;
@@ -32,8 +32,6 @@ const swapWith = (currency: CurrencyCode) => {
     state.value.baseCurrency = currency;
   }
 };
-
-
 
 onMounted(() => {
   if (!Object.keys(state.value.rates).length)

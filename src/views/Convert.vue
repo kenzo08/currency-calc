@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import type { CurrencyCode } from '../types/currency.ts';
 
 const currencyStore = useCurrencyStore();
-const { fetchRates, convert } = currencyStore;
+const { fetchRates } = currencyStore;
 const { state } = storeToRefs(currencyStore);
 
 const currencies: CurrencyCode[] = ['USD', 'EUR', 'RUB'];
@@ -23,10 +23,7 @@ const validateInput = (value: string): boolean => {
 };
 
 const formatNumber = (value: number): string => {
-  return value.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  return parseFloat(value.toFixed(4)).toString();
 };
 
 const parseNumber = (value: string): number => {
@@ -46,8 +43,12 @@ const updateAmount2 = () => {
     return;
   }
 
-  const result = convert(parseNumber(amount1.value), currency1.value, currency2.value);
-  amount2.value = formatNumber(result);
+  const rateKey = `${currency1.value.toLowerCase()}-${currency2.value.toLowerCase()}`;
+  const rate = state.value.rates[rateKey];
+  if (rate) {
+    const result = parseNumber(amount1.value) * rate;
+    amount2.value = formatNumber(result);
+  }
 };
 
 const updateAmount1 = () => {
@@ -63,8 +64,12 @@ const updateAmount1 = () => {
     return;
   }
 
-  const result = convert(parseNumber(amount2.value), currency2.value, currency1.value);
-  amount1.value = formatNumber(result);
+  const rateKey = `${currency2.value.toLowerCase()}-${currency1.value.toLowerCase()}`;
+  const rate = state.value.rates[rateKey];
+  if (rate) {
+    const result = parseNumber(amount2.value) * rate;
+    amount1.value = formatNumber(result);
+  }
 };
 
 watch([currency1, currency2], () => {
