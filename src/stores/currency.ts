@@ -13,8 +13,6 @@ export const useCurrencyStore = defineStore('currency', () => {
     error: null,
   })
 
-  const lastFetchTime = ref<number>(0)
-
   async function fetchRates() {
     state.value.loading = true
     state.value.error = null
@@ -22,7 +20,6 @@ export const useCurrencyStore = defineStore('currency', () => {
     try {
       const response = await axios.get(API_URL)
       state.value.rates = response.data
-      lastFetchTime.value = Date.now()
     } catch (err) {
       state.value.error = err instanceof Error ? err.message : 'Failed to fetch exchange rates'
       console.error('Error fetching rates:', err)
