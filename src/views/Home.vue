@@ -21,10 +21,6 @@ const otherCurrencies = computed(() => {
   return currencies.filter(currency => currency !== currentCurrency.value);
 });
 
-const swapWith = (currency: CurrencyCode) => {
-  currentCurrency.value = currency;
-};
-
 onMounted(() => {
   if (!Object.keys(state.value.rates).length)
     fetchRates();
@@ -50,7 +46,6 @@ onMounted(() => {
         :key="currency"
         :baseCurrency="currentCurrency"
         :targetCurrency="currency"
-        @swap="swapWith"
       />
     </div>
   </div>
